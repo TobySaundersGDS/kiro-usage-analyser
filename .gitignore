@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+
+# Kiro report archives and extracted data — NEVER commit (contains PII)
+*.zip
+*.csv
+reports/
+data/
+sample/
+samples/
+*.kiro-report*
+
+# Local env
+.env
+.env.*

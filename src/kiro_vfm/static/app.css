@@ -1,0 +1,119 @@
+:root {
+  --fg: #1a1a1a;
+  --bg: #ffffff;
+  --accent: #1d4ed8;
+  --error-bg: #fdecea;
+  --error-fg: #611a15;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--fg);
+  background: var(--bg);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+}
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  background: var(--bg);
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--accent);
+}
+
+header, main, footer {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+}
+
+.subtitle { color: #444; }
+
+.field { margin: 1rem 0; }
+label { display: block; font-weight: 600; margin-bottom: 0.25rem; }
+.hint { color: #555; font-size: 0.9rem; }
+
+button {
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  border-radius: 4px;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+button:focus-visible { outline: 3px solid #000; outline-offset: 2px; }
+
+.error {
+  background: var(--error-bg);
+  color: var(--error-fg);
+  border: 1px solid var(--error-fg);
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+caption { text-align: left; font-weight: 600; margin-bottom: 0.5rem; }
+th, td {
+  border: 1px solid #ccc;
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+  word-break: break-word;
+}
+a { color: var(--accent); }
+
+.note {
+  background: #eef2ff;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+}
+.note p { margin: 0; }
+
+.filter-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  margin: 1rem 0;
+}
+.filter-form .field { margin: 0; }
+
+select, input[type="date"] {
+  font-size: 1rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid #767676;
+  border-radius: 4px;
+}
+select:focus-visible,
+input:focus-visible { outline: 3px solid #000; outline-offset: 2px; }
+
+.clear-link { margin-left: 0.75rem; }
+
+.empty {
+  background: #f3f4f6;
+  border: 1px solid #9ca3af;
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+}
+
+code {
+  background: #f3f4f6;
+  padding: 0 0.2rem;
+  border-radius: 3px;
+}

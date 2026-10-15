@@ -1,0 +1,60 @@
+[project]
+name = "kiro-vfm"
+version = "0.1.0a1"
+description = "Local, ephemeral Kiro usage value-for-money analyser"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+dependencies = [
+    "fastapi==0.143.0",
+    "uvicorn==0.54.0",
+    "jinja2==3.1.6",
+    "python-multipart==0.0.32",
+]
+
+[project.scripts]
+kiro-vfm = "kiro_vfm.__main__:main"
+
+[dependency-groups]
+dev = [
+    "pytest==9.1.1",
+    "httpx==0.28.1",
+    "ruff==0.17.0",
+    "mypy==2.4.0",
+]
+
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/kiro_vfm"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S", "C4", "SIM"]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106"]
+# FastAPI uses callables (File/Form/Depends) as parameter defaults by design.
+"src/kiro_vfm/web/routes.py" = ["B008"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+files = ["src"]
+
+[[tool.mypy.overrides]]
+module = ["uvicorn.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]
