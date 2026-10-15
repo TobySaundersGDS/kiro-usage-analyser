@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Kiro usage analyser{% endblock %}</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header>
+    <h1>Kiro usage value-for-money analyser</h1>
+    <p class="subtitle">Runs locally. Your data never leaves this machine and is held only in memory.</p>
+  </header>
+  <main id="main">
+    {% block content %}{% endblock %}
+  </main>
+  <footer>
+    <p>Local, ephemeral tool. No data is stored on disk or sent over the network.</p>
+  </footer>
+</body>
+</html>

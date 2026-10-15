@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Upload a Kiro usage archive{% endblock %}
+{% block content %}
+  <section aria-labelledby="upload-heading">
+    <h2 id="upload-heading">Upload a Kiro usage report archive</h2>
+
+    {% if error %}
+      <div role="alert" class="error">
+        <p>{{ error }}</p>
+      </div>
+    {% endif %}
+
+    <p id="upload-help">
+      Select the ZIP archive exported from Kiro. Only CSV report members are
+      accepted. The archive is validated in memory and never extracted to disk.
+    </p>
+
+    <form method="post" action="/upload" enctype="multipart/form-data"
+          aria-describedby="upload-help">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="field">
+        <label for="file">Kiro usage ZIP archive</label>
+        <input type="file" id="file" name="file" accept=".zip,application/zip" required
+               aria-describedby="file-hint">
+        <p id="file-hint" class="hint">Maximum size 100&nbsp;MB.</p>
+      </div>
+      <button type="submit">Validate archive</button>
+    </form>
+  </section>
+{% endblock %}

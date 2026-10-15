@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% block title %}Recorded usage{% endblock %}
+{% block content %}
+  <section aria-labelledby="recorded-heading">
+    <h2 id="recorded-heading">Recorded usage (Level 1)</h2>
+    <p>
+      These are <strong>exact recorded facts</strong> taken directly from the
+      uploaded reports. No estimates, pricing, token counts, or
+      value-for-money figures are shown on this page.
+    </p>
+
+    <div class="note" role="note">
+      <p>
+        <strong>About messages.</strong> <code>Total messages</code> counts
+        prompts, responses, and tool calls recorded in the reports. It is
+        <strong>not</strong> a count of API invocations and is not comparable
+        to Bedrock request counts. Credits are workload units recorded by
+        Kiro, not tokens.
+      </p>
+    </div>
+
+    <h3 id="filter-heading">Filters</h3>
+    <form method="get" action="/analysis/{{ token }}"
+          aria-labelledby="filter-heading" class="filter-form">
+      <div class="field">
+        <label for="date_from">From date</label>
+        <input type="date" id="date_from" name="date_from"
+               value="{{ filter_view.date_from }}"
+               {% if filter_view.min_date %}min="{{ filter_view.min_date }}"{% endif %}
+               {% if filter_view.max_date %}max="{{ filter_view.max_date }}"{% endif %}>
+      </div>
+      <div class="field">
+        <label for="date_to">To date</label>
+        <input type="date" id="date_to" name="date_to"
+               value="{{ filter_view.date_to }}"
+               {% if filter_view.min_date %}min="{{ filter_view.min_date }}"{% endif %}
+               {% if filter_view.max_date %}max="{{ filter_view.max_date }}"{% endif %}>
+      </div>
+      <div class="field">
+        <label for="client">Client</label>
+        <select id="client" name="client">
+          <option value="">All clients</option>
+          {% for c in filter_view.available_clients %}
+            <option value="{{ c }}"
+              {% if c == filter_view.selected_client %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <button type="submit">Apply filters</button>
+        {% if filter_view.is_active %}
+          <a href="/analysis/{{ token }}" class="clear-link">Clear filters</a>
+        {% endif %}
+      </div>
+    </form>
+
+    {% if not analysis.has_records %}
+      <p role="status" class="empty">
+        No recorded usage matches the current filters.
+      </p>
+    {% else %}
+      {% set t = analysis.totals %}
+      <h3 id="kpi-heading">Totals</h3>
+      <table aria-labelledby="kpi-heading">
+        <caption>Exact recorded totals for the selected records</caption>
+        <tbody>
+          <tr><th scope="row">Records</th><td>{{ t.record_count }}</td></tr>
+          <tr><th scope="row">Distinct users</th><td>{{ t.distinct_users }}</td></tr>
+          <tr><th scope="row">Observed subscriptions</th><td>{{ t.subscription_count }}</td></tr>
+          <tr><th scope="row">Distinct days</th><td>{{ t.distinct_days }}</td></tr>
+          <tr><th scope="row">Credits used</th><td>{{ t.credits_used | decimal }}</td></tr>
+          <tr><th scope="row">Overage credits used</th><td>{{ t.overage_credits_used | decimal }}</td></tr>
+          <tr><th scope="row">Total messages</th><td>{{ t.total_messages }}</td></tr>
+          <tr><th scope="row">Chat conversations</th><td>{{ t.chat_conversations }}</td></tr>
+          <tr><th scope="row">Per-model messages (recorded)</th><td>{{ t.model_messages }}</td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="by-date-heading">By date</h3>
+      <table aria-labelledby="by-date-heading">
+        <caption>Recorded usage per day</caption>
+        <thead>
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Records</th>
+            <th scope="col">Users</th>
+            <th scope="col">Credits</th>
+            <th scope="col">Messages</th>
+            <th scope="col">Conversations</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in analysis.by_date %}
+            <tr>
+              <td>{{ row.date }}</td>
+              <td>{{ row.record_count }}</td>
+              <td>{{ row.distinct_users }}</td>
+              <td>{{ row.credits_used | decimal }}</td>
+              <td>{{ row.total_messages }}</td>
+              <td>{{ row.chat_conversations }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <h3 id="by-person-heading">By person (subscription)</h3>
+      <table aria-labelledby="by-person-heading">
+        <caption>
+          Recorded usage per subscription, keyed by profile and user. Email is
+          shown to help you reconcile a specific person.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Email</th>
+            <th scope="col">Profile</th>
+            <th scope="col">Tiers observed</th>
+            <th scope="col">Clients</th>
+            <th scope="col">Records</th>
+            <th scope="col">Credits</th>
+            <th scope="col">Overage credits</th>
+            <th scope="col">Messages</th>
+            <th scope="col">Conversations</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in analysis.by_person %}
+            <tr>
+              <td>{{ row.user_email }}</td>
+              <td>{{ row.profile_id }}</td>
+              <td>{{ row.tiers | join(', ') }}</td>
+              <td>{{ row.client_types | map('string') | join(', ') }}</td>
+              <td>{{ row.record_count }}</td>
+              <td>{{ row.credits_used | decimal }}</td>
+              <td>{{ row.overage_credits_used | decimal }}</td>
+              <td>{{ row.total_messages }}</td>
+              <td>{{ row.chat_conversations }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <h3 id="by-client-heading">By client</h3>
+      <table aria-labelledby="by-client-heading">
+        <caption>Recorded usage per Kiro client</caption>
+        <thead>
+          <tr>
+            <th scope="col">Client</th>
+            <th scope="col">Records</th>
+            <th scope="col">Users</th>
+            <th scope="col">Credits</th>
+            <th scope="col">Total messages</th>
+            <th scope="col">Per-model messages</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in analysis.by_client %}
+            <tr>
+              <td>{{ row.client_type.value }}</td>
+              <td>{{ row.record_count }}</td>
+              <td>{{ row.distinct_users }}</td>
+              <td>{{ row.credits_used | decimal }}</td>
+              <td>{{ row.total_messages }}</td>
+              <td>{{ row.model_messages }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <h3 id="by-model-heading">By model</h3>
+      {% if analysis.by_model %}
+        <table aria-labelledby="by-model-heading">
+          <caption>
+            Recorded per-model message counts. Model names are shown exactly as
+            recorded; no pricing or token estimate is implied.
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Model (canonical)</th>
+              <th scope="col">Reported name(s)</th>
+              <th scope="col">Messages</th>
+              <th scope="col">Users</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in analysis.by_model %}
+              <tr>
+                <td>{{ row.slug }}</td>
+                <td>{{ row.raw_names | join(', ') }}</td>
+                <td>{{ row.messages }}</td>
+                <td>{{ row.distinct_users }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p role="status">No per-model message columns were present in the selected records.</p>
+      {% endif %}
+    {% endif %}
+
+    <p><a href="/summary/{{ token }}">Back to import summary</a></p>
+  </section>
+{% endblock %}

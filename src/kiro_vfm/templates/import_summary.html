@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Import summary{% endblock %}
+{% block content %}
+  <section aria-labelledby="summary-heading">
+    <h2 id="summary-heading">Import summary</h2>
+    <p>
+      The archive was validated and its CSV reports were parsed. Nothing
+      was written to disk; everything below is held only in memory for this
+      session and is cleared when the session expires or the process restarts.
+    </p>
+
+    {% set agg = result.aggregate %}
+
+    <h3 id="archive-heading">Archive validated</h3>
+    <table aria-labelledby="archive-heading">
+      <caption>Archive-level validation counts</caption>
+      <tbody>
+        <tr><th scope="row">Compressed size (bytes)</th><td>{{ result.archive.compressed_bytes }}</td></tr>
+        <tr><th scope="row">Total members</th><td>{{ result.archive.total_members }}</td></tr>
+        <tr><th scope="row">Accepted CSV reports</th><td>{{ result.archive.csv_count }}</td></tr>
+        <tr><th scope="row">Ignored members</th><td>{{ result.archive.ignored_count }}</td></tr>
+        <tr><th scope="row">Rejected members</th><td>{{ result.archive.rejected_count }}</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="members-heading">Member details</h3>
+    <table aria-labelledby="members-heading">
+      <caption>Per-member outcomes. Member names shown are sanitised for display and HTML-escaped.</caption>
+      <thead>
+        <tr>
+          <th scope="col">Member</th>
+          <th scope="col">Status</th>
+          <th scope="col">Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for member in result.archive.members %}
+          <tr>
+            <td>{{ member.display_name }}</td>
+            <td>{{ member.status.value }}</td>
+            <td>{{ member.reason }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h3 id="rows-heading">Parsed usage</h3>
+    {% if agg.accepted_rows == 0 %}
+      <p role="status">
+        No valid usage records were parsed from this archive. Review the data
+        quality issues below.
+      </p>
+    {% endif %}
+    <table aria-labelledby="rows-heading">
+      <caption>Aggregate import metadata derived from parsed records</caption>
+      <tbody>
+        <tr><th scope="row">Accepted CSV rows</th><td>{{ agg.accepted_rows }}</td></tr>
+        <tr><th scope="row">Rejected CSV rows</th><td>{{ agg.rejected_rows }}</td></tr>
+        <tr><th scope="row">Exact-duplicate rows ignored</th><td>{{ result.duplicate_count }}</td></tr>
+        <tr><th scope="row">Conflicting rows discarded</th><td>{{ result.conflict_count }}</td></tr>
+        <tr><th scope="row">Data quality issues (total)</th><td>{{ result.issues|length }}</td></tr>
+        <tr><th scope="row">— warnings</th><td>{{ result.warning_count }}</td></tr>
+        <tr><th scope="row">— errors</th><td>{{ result.error_count }}</td></tr>
+        <tr>
+          <th scope="row">Date range</th>
+          <td>
+            {% if agg.earliest_date %}
+              {{ agg.earliest_date }} to {{ agg.latest_date }}
+            {% else %}
+              none
+            {% endif %}
+          </td>
+        </tr>
+        <tr><th scope="row">Distinct users</th><td>{{ agg.distinct_users }}</td></tr>
+        <tr><th scope="row">Observed subscriptions</th><td>{{ agg.subscription_count }}</td></tr>
+        <tr>
+          <th scope="row">Client types</th>
+          <td>
+            {% if agg.client_types %}
+              {{ agg.client_types|map('string')|sort|join(', ') }}
+            {% else %}
+              none
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Models used</th>
+          <td>
+            {% if agg.model_slugs %}
+              {{ agg.model_slugs|sort|join(', ') }}
+            {% else %}
+              none
+            {% endif %}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 id="issues-heading">Data quality issues</h3>
+    {% if result.issues %}
+      <table aria-labelledby="issues-heading">
+        <caption>
+          Issues found while parsing. Messages are generic and contain no
+          personal data or raw cell values.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Source</th>
+            <th scope="col">Row</th>
+            <th scope="col">Severity</th>
+            <th scope="col">Code</th>
+            <th scope="col">Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for issue in result.issues %}
+            <tr>
+              <td>{{ issue.source.display_name if issue.source else "—" }}</td>
+              <td>{{ issue.row if issue.row is not none else "—" }}</td>
+              <td>{{ issue.severity.value }}</td>
+              <td>{{ issue.code.value }}</td>
+              <td>{{ issue.message }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p role="status">No data quality issues were found.</p>
+    {% endif %}
+
+    {% if agg.accepted_rows > 0 %}
+      <p>
+        <a href="/analysis/{{ token }}">View recorded usage analysis (Level 1)</a>
+      </p>
+    {% endif %}
+
+    <p><a href="/">Upload another archive</a></p>
+  </section>
+{% endblock %}
